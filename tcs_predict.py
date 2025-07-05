@@ -2,31 +2,52 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 import yfinance as yf
 
+# 🔄 Load model from CSV
 def load_model():
-    # Load data from the local CSV file
-    df = pd.read_csv("tcs_stock.csv")
-    df['Prev_Close'] = df['Close'].shift(1)
-    df.dropna(inplace=True)
+    try:
+        df = pd.read_csv("tcs_stock.csv")
+        print("📊 Loaded rows from CSV:", len(df))
 
-    X = df[['Open', 'High', 'Low', 'Volume', 'Prev_Close']]
-    y = df['Close']
+        # Clean column names (remove spaces, lowercase)
+        df.columns = df.columns.str.strip().str.capitalize()
 
-    model = LinearRegression()
-    model.fit(X, y)
-    return model
+        df['Prev_close'] = df['Close'].shift(1)
+        df.dropna(inplace=True)
+        print("✅ Rows after dropna:", len(df))
 
+        if len(df) == 0:
+            print("⚠️ No usable data after dropna. Cannot train model.")
+            return None
+
+        X = df[['Open', 'High', 'Low', 'Volume', 'Prev_close']]
+        y = df['Close']
+
+        model = LinearRegression()
+        model.fit(X, y)
+        return model
+    except Exception as e:
+        print("❌ Error loading model:", e)
+        return None
+
+# Load model once globally
 model = load_model()
 
+# 🔍 Predict closing price from inputs
 def predict_price(open_, high, low, volume, prev_close):
-    input_data = [[open_, high, low, volume, prev_close]]
-    return model.predict(input_data)[0]
+    if model is None:
+        return "⚠️ Model not trained due to lack of data."
 
+    input_data = [[open_, high, low, volume, prev_close]]
+    return round(model.predict(input_data)[0], 2)
+
+# 📈 Fetch live TCS stock data using yfinance
 def get_live_stock_data(ticker="TCS.NS"):
     try:
         stock = yf.Ticker(ticker)
         data = stock.history(period="1d")
 
         if data.empty:
+            print("⚠️ No live stock data found.")
             return None
 
         last_row = data.iloc[-1]
@@ -37,5 +58,6 @@ def get_live_stock_data(ticker="TCS.NS"):
             "Close": round(last_row['Close'], 2),
             "Volume": int(last_row['Volume']),
         }
-    except:
+    except Exception as e:
+        print("❌ Error fetching live stock data:", e)
         return None
