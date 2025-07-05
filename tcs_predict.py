@@ -1,35 +1,25 @@
 import pandas as pd
-import mysql.connector
 from sklearn.linear_model import LinearRegression
+import yfinance as yf
 
 def load_model():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Athu@2608",  # replace with your real password
-        database="tcs_stock_analysis"
-    )
-    df = pd.read_sql("SELECT * FROM tcs_stock", conn)
-    conn.close()
-
+    # Load data from the local CSV file
+    df = pd.read_csv("tcs_stock.csv")
     df['Prev_Close'] = df['Close'].shift(1)
-    df = df.dropna()
+    df.dropna(inplace=True)
 
     X = df[['Open', 'High', 'Low', 'Volume', 'Prev_Close']]
     y = df['Close']
 
     model = LinearRegression()
     model.fit(X, y)
-
     return model
 
-model = load_model()  # Load once globally
+model = load_model()
 
 def predict_price(open_, high, low, volume, prev_close):
     input_data = [[open_, high, low, volume, prev_close]]
     return model.predict(input_data)[0]
-
-import yfinance as yf
 
 def get_live_stock_data(ticker="TCS.NS"):
     try:
@@ -49,4 +39,3 @@ def get_live_stock_data(ticker="TCS.NS"):
         }
     except:
         return None
-
