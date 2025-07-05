@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TCS Stock Predictor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom right, #e3f2fd, #bbdefb);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #0d47a1;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            width: 320px;
+            margin-top: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background-color: #0d47a1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1565c0;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-left: 6px solid #388e3c;
+            border-radius: 8px;
+            width: 320px;
+            color: #2e7d32;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .graphic {
+            margin-top: 10px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>TCS Stock Price Predictor</h1>
+    <p>Enter stock values to predict the closing price</p>
+    <img class="graphic" src="https://cdn-icons-png.flaticon.com/512/2942/2942819.png" alt="Stock Icon">
+
+    {% if live_data %}
+    <div class="result" style="background-color:#fffde7; color:#f57f17;">
+        <strong>📈 Live TCS Price (Today)</strong><br>
+        Open: ₹{{ live_data.Open }} | High: ₹{{ live_data.High }} | Low: ₹{{ live_data.Low }}<br>
+        Volume: {{ live_data.Volume }} | Close: ₹{{ live_data.Close }}
+    </div>
+{% else %}
+    <div class="result" style="background-color:#ffebee; color:#c62828;">
+        Live data not available. Check your internet or symbol.
+    </div>
+{% endif %}
+
+
+    <form method="POST">
+        <input name="open" placeholder="Open Price (e.g. 3900.00)" required>
+        <input name="high" placeholder="High Price (e.g. 3950.75)" required>
+        <input name="low" placeholder="Low Price (e.g. 3890.50)" required>
+        <input name="volume" placeholder="Volume (e.g. 1200000)" required>
+        <input name="prev_close" placeholder="Previous Close (e.g. 3920.20)" required>
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if prediction %}
+        <div class="result">
+            Predicted Close Price: ₹{{ prediction }}
+        </div>
+    {% endif %}
+
+    <div class="footer">Powered by Flask • Machine Learning + MySQL + Python</div>
+
+</body>
+</html>
